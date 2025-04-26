@@ -232,6 +232,8 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
+        return self.forward(x)
+
 
 
     def get_loss(self, x, y):
@@ -257,6 +259,35 @@ class DigitClassificationModel(Module):
         Trains the model.
         """
         """ YOUR CODE HERE """
+        dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+        optimizer = optim.Adam(self.parameters(), lr=0.01)
+        done = False
+        while not done:
+            # Train model
+
+
+
+            # # Check if done
+            # if (self.get_loss() < .03):
+            #     done = True
+            # else:
+            #     done = False
+            print("still training")
+            for batch in dataloader:
+                x = batch['x']
+                y = batch['label']
+                loss = self.get_loss(x, y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            data_x = torch.tensor(dataset.x,dtype=torch.float32)
+            labels = torch.tensor(dataset.y, dtype=torch.float32)
+            if (self.get_loss(data_x, labels) < .02):
+                done = True
+            else:
+                done = False
+
+
 
 
 
