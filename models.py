@@ -248,9 +248,9 @@ class DigitClassificationModel(Module):
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-
-
-
+        forwardX = self.forward(x)
+        loss = cross_entropy(forwardX, y)
+        return loss
 
     def train(self, dataset):
         """
