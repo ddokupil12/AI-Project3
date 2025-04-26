@@ -36,9 +36,9 @@ class PerceptronModel(Module):
         Hint: You can use ones(dim) to create a tensor of dimension dim.
         """
         super(PerceptronModel, self).__init__()
-        
+
         "*** YOUR CODE HERE ***"
-        
+
 
     def get_weights(self):
         """
@@ -57,7 +57,7 @@ class PerceptronModel(Module):
         The pytorch function `tensordot` may be helpful here.
         """
         "*** YOUR CODE HERE ***"
-        
+
 
     def get_prediction(self, x):
         """
@@ -77,7 +77,7 @@ class PerceptronModel(Module):
 
         Each sample in the dataloader is in the form {'x': features, 'label': label} where label
         is the item we need to predict based off of its features.
-        """        
+        """
         with no_grad():
             dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
             "*** YOUR CODE HERE ***"
@@ -108,7 +108,7 @@ class RegressionModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
-    
+
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -120,8 +120,8 @@ class RegressionModel(Module):
         Returns: a tensor of size 1 containing the loss
         """
         "*** YOUR CODE HERE ***"
- 
-        
+
+
 
     def train(self, dataset):
         """
@@ -139,7 +139,7 @@ class RegressionModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
-            
+
 
 
 
@@ -187,7 +187,7 @@ class DigitClassificationModel(Module):
         """
         """ YOUR CODE HERE """
 
- 
+
 
     def get_loss(self, x, y):
         """
@@ -204,8 +204,8 @@ class DigitClassificationModel(Module):
         """
         """ YOUR CODE HERE """
 
-    
-        
+
+
 
     def train(self, dataset):
         """
@@ -265,7 +265,7 @@ class LanguageIDModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
-    
+
     def get_loss(self, xs, y):
         """
         Computes the loss for a batch of examples.
@@ -281,7 +281,7 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-        
+
 
     def train(self, dataset):
         """
@@ -299,9 +299,9 @@ class LanguageIDModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
-        
 
-def Convolve(input: tensor, weight: tensor):
+
+def Convolve(input: tensor, weight: tensor): # Q5
     """
     Acts as a convolution layer by applying a 2d convolution with the given inputs and weights.
     DO NOT import any pytorch methods to directly do this, the convolution must be done with only the functions
@@ -312,20 +312,60 @@ def Convolve(input: tensor, weight: tensor):
 
     tensor[y:y+height, x:x+width]
 
-    This returns a subtensor who's first element is tensor[y,x] and has height 'height, and width 'width'
+    This returns a subtensor who's first element is tensor[y,x] and has height 'height', and width 'width'
     """
     input_tensor_dimensions = input.shape
     weight_dimensions = weight.shape
     Output_Tensor = tensor(())
     "*** YOUR CODE HERE ***"
+    # print('input', input_tensor_dimensions)
+    # print('weight', weight_dimensions)
+    print('output...')
+    # for i in input_tensor_dimensions:
+    #     print('i', i)
+    # for i in input:
+    #     print('i', i)
+    #     for k in i:
+    #         print('k', k)
+    # height = weight_dimensions[0]
+    # width = weight_dimensions[1]
+    # tempi = []
+    # for i in range(height):
+    #     tempk = []
+    #     for k in range(width):
+    #         dot = tensordot(input[i:i + height, k: k + width], weight, dims=1)
+    #         tempk.append(dot)
+    #         print(dot)
 
-    
+
+    #     tempKStack = torch.stack(tempk)
+        # tempi.append(tempKStack)
+        # print('tempkstack', tempKStack)
+
+    # Add temp to output tensor
+    # Output_Tensor = torch.stack(tempi)
+
+    inputHeight, inputWidth = input_tensor_dimensions
+    weightHeight, weightWidth = weight_dimensions
+    outputHeight = (inputHeight - weightHeight)
+    outputWidth = (inputWidth - weightWidth)
+
+    Output_Tensor = torch.zeros(outputHeight, outputWidth)
+
+    for i in range(outputHeight):
+        for k in range(outputWidth):
+            window = input[i:i + weightHeight, k:k + weightWidth]
+            Output_Tensor[i, k] = torch.sum(window * weight)
+
+
+    print(Output_Tensor.shape)
+
+    print(Output_Tensor)
     "*** End Code ***"
     return Output_Tensor
 
 
-
-class DigitConvolutionalModel(Module):
+class DigitConvolutionalModel(Module): # Q5
     """
     A model for handwritten digit classification using the MNIST dataset.
 
@@ -336,7 +376,7 @@ class DigitConvolutionalModel(Module):
     Note that this class looks different from a standard pytorch model since we don't need to train it
     as it will be run on preset weights.
     """
-    
+
 
     def __init__(self):
         # Initialize your model parameters here
@@ -347,11 +387,9 @@ class DigitConvolutionalModel(Module):
         """ YOUR CODE HERE """
 
 
-
-
     def run(self, x):
         return self(x)
- 
+
     def forward(self, x):
         """
         The convolutional layer is already applied, and the output is flattened for you. You should treat x as
@@ -378,8 +416,8 @@ class DigitConvolutionalModel(Module):
         """
         """ YOUR CODE HERE """
 
-     
-        
+
+
 
     def train(self, dataset):
         """
@@ -405,7 +443,7 @@ class Attention(Module):
         #Masking part of attention layer
         self.register_buffer("mask", torch.tril(torch.ones(block_size, block_size))
                                      .view(1, 1, block_size, block_size))
-       
+
         self.layer_size = layer_size
 
 
@@ -425,5 +463,3 @@ class Attention(Module):
         B, T, C = input.size()
 
         """YOUR CODE HERE"""
-
-     
