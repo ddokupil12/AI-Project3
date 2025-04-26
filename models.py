@@ -196,16 +196,22 @@ class DigitClassificationModel(Module):
     (See RegressionModel for more information about the APIs of different
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
+
+    Use a CNN
     """
     def __init__(self):
         # Initialize your model parameters here
         super().__init__()
         input_size = 28 * 28
+        hidden_state = 3 * 3 #This is slightly random but I think it a good middle between 2 and 5
         output_size = 10
         "*** YOUR CODE HERE ***"
-
-
-
+        "We need a input, convotion layer, pooling layer, activation layer and output"
+        self.layer1 = Linear(input_size,hidden_state)
+        self.layer2 = Linear(hidden_state,output_size)
+    
+    def forward(self,x):
+        
 
     def run(self, x):
         """
@@ -223,7 +229,6 @@ class DigitClassificationModel(Module):
         """
         """ YOUR CODE HERE """
 
- 
 
     def get_loss(self, x, y):
         """
