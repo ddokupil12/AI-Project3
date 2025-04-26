@@ -207,14 +207,16 @@ class DigitClassificationModel(Module):
         output_size = 10
         "*** YOUR CODE HERE ***"
         "We need a input, convotion layer, pooling layer, activation layer and output"
-        self.layer1 = Linear(input_size,hidden_state)
-        self.layer2 = Linear(hidden_state,output_size)
+        self.layer1 = Linear(input_size,256)
+        self.layer2 = Linear(256,128)
+        self.layer3 = Linear(128,output_size)
 
     def forward(self,x):
         "*** YOUR CODE HERE ***"
         x = x.view(x.size(0), -1)
         x = relu(self.layer1(x))
         x = relu(self.layer2(x))
+        x = self.layer3(x)
         return x
 
     def run(self, x):
@@ -259,19 +261,11 @@ class DigitClassificationModel(Module):
         Trains the model.
         """
         """ YOUR CODE HERE """
-        dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=784, shuffle=True)
         optimizer = optim.Adam(self.parameters(), lr=0.01)
         done = False
         while not done:
             # Train model
-
-
-
-            # # Check if done
-            # if (self.get_loss() < .03):
-            #     done = True
-            # else:
-            #     done = False
             print("still training")
             for batch in dataloader:
                 x = batch['x']
@@ -282,7 +276,8 @@ class DigitClassificationModel(Module):
                 optimizer.step()
             data_x = torch.tensor(dataset.x,dtype=torch.float32)
             labels = torch.tensor(dataset.y, dtype=torch.float32)
-            if (self.get_loss(data_x, labels) < .02):
+            #self.get_loss(data_x, labels)
+            if (dataset.get_validation_accuracy() > .97):
                 done = True
             else:
                 done = False
