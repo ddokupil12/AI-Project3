@@ -37,7 +37,7 @@ class PerceptronModel(Module):
         """
         super(PerceptronModel, self).__init__()
         self.w = Parameter(ones(1, dimensions), False)
-        
+
 
     def get_weights(self):
         """
@@ -57,7 +57,7 @@ class PerceptronModel(Module):
         """
         "*** YOUR CODE HERE ***"
         return tensordot(x,self.get_weights())
-        
+
 
     def get_prediction(self, x):
         """
@@ -81,7 +81,7 @@ class PerceptronModel(Module):
 
         Each sample in the dataloader is in the form {'x': features, 'label': label} where label
         is the item we need to predict based off of its features.
-        """        
+        """
         with no_grad():
             dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
             done = False
@@ -94,8 +94,8 @@ class PerceptronModel(Module):
                     if self.get_prediction(x) != y:
                         self.w += (x*y).squeeze(0)
                         done = False
-                        
-                    
+
+
 
 
 class RegressionModel(Module):
@@ -126,7 +126,7 @@ class RegressionModel(Module):
         x = relu(self.layer1(x))
         x = relu(self.layer2(x))
         return self.output(x)
-    
+
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -140,7 +140,7 @@ class RegressionModel(Module):
         "*** YOUR CODE HERE ***"
         predictions = self.forward(x)
         return mse_loss(predictions, y)
-        
+
 
     def train(self, dataset):
         """
@@ -171,11 +171,11 @@ class RegressionModel(Module):
             data_x = torch.tensor(dataset.x,dtype=torch.float32)
             labels = torch.tensor(dataset.y, dtype=torch.float32)
             if (self.get_loss(data_x, labels) < .02):
-                done = True 
+                done = True
             else:
                 done = False
 
-            
+
 
 
 
@@ -209,9 +209,13 @@ class DigitClassificationModel(Module):
         "We need a input, convotion layer, pooling layer, activation layer and output"
         self.layer1 = Linear(input_size,hidden_state)
         self.layer2 = Linear(hidden_state,output_size)
-    
+
     def forward(self,x):
-        
+        "*** YOUR CODE HERE ***"
+        x = x.view(x.size(0), -1)
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+        return x
 
     def run(self, x):
         """
@@ -245,8 +249,8 @@ class DigitClassificationModel(Module):
         """
         """ YOUR CODE HERE """
 
-    
-        
+
+
 
     def train(self, dataset):
         """
@@ -306,7 +310,7 @@ class LanguageIDModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
-    
+
     def get_loss(self, xs, y):
         """
         Computes the loss for a batch of examples.
@@ -322,7 +326,7 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-        
+
 
     def train(self, dataset):
         """
@@ -340,7 +344,7 @@ class LanguageIDModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
-        
+
 
 def Convolve(input: tensor, weight: tensor):
     """
@@ -360,7 +364,7 @@ def Convolve(input: tensor, weight: tensor):
     Output_Tensor = tensor(())
     "*** YOUR CODE HERE ***"
 
-    
+
     "*** End Code ***"
     return Output_Tensor
 
@@ -377,7 +381,7 @@ class DigitConvolutionalModel(Module):
     Note that this class looks different from a standard pytorch model since we don't need to train it
     as it will be run on preset weights.
     """
-    
+
 
     def __init__(self):
         # Initialize your model parameters here
@@ -392,7 +396,7 @@ class DigitConvolutionalModel(Module):
 
     def run(self, x):
         return self(x)
- 
+
     def forward(self, x):
         """
         The convolutional layer is already applied, and the output is flattened for you. You should treat x as
@@ -419,8 +423,8 @@ class DigitConvolutionalModel(Module):
         """
         """ YOUR CODE HERE """
 
-     
-        
+
+
 
     def train(self, dataset):
         """
@@ -446,7 +450,7 @@ class Attention(Module):
         #Masking part of attention layer
         self.register_buffer("mask", torch.tril(torch.ones(block_size, block_size))
                                      .view(1, 1, block_size, block_size))
-       
+
         self.layer_size = layer_size
 
 
@@ -466,5 +470,3 @@ class Attention(Module):
         B, T, C = input.size()
 
         """YOUR CODE HERE"""
-
-     
