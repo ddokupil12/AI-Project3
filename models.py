@@ -165,6 +165,7 @@ class RegressionModel(Module):
                 x = batch['x']
                 y = batch['label']
                 loss = self.get_loss(x, y)
+                print(loss)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -268,6 +269,10 @@ class LanguageIDModel(Module):
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
         super(LanguageIDModel, self).__init__()
         "*** YOUR CODE HERE ***"
+        self.layer1 = Linear(self.num_chars, 40)
+        self.layer2 = Linear(40, 40)
+        self.output = Linear(40, 5)
+
 
 
     def run(self, xs):
@@ -301,6 +306,17 @@ class LanguageIDModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
+        val = []
+        #print("Test test test here")
+        for x in range(0,len(xs)):
+            #print(f"HERE: {xs[x]}")
+            if x == 0:
+                hiddenLayer = relu(self.layer1(xs[x]))
+            else:
+                hiddenLayer = relu(self.layer2(hiddenLayer) + self.layer1(xs[x]))
+        #print("Got Here")
+        output = self.output(hiddenLayer)
+        return output
     
     def get_loss(self, xs, y):
         """
@@ -317,7 +333,12 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-        
+        predictions = self.run(xs)
+        target = torch.argmax(y, dim=1)
+        # print(target)
+        loss = cross_entropy(predictions, target)
+        #print(loss)
+        return loss
 
     def train(self, dataset):
         """
@@ -334,8 +355,45 @@ class LanguageIDModel(Module):
         For more information, look at the pytorch documentation of torch.movedim()
         """
         "*** YOUR CODE HERE ***"
+        #        dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+        # optimizer = optim.Adam(self.parameters(), lr=0.01)
+        # done = False
+        # while(not done):
+        #     for batch in dataloader:
+        #         x = batch['x']
+        #         y = batch['label']
+        #         loss = self.get_loss(x, y)
+        #         optimizer.zero_grad()
+        #         loss.backward()
+        #         optimizer.step()
+        #     data_x = torch.tensor(dataset.x,dtype=torch.float32)
+        #     labels = torch.tensor(dataset.y, dtype=torch.float32)
+        #     if (self.get_loss(data_x, labels) < .02):
+        #         done = True 
+        #     else:
+        #         done = False
+        dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
+        optimizer = optim.Adam(self.parameters(), lr = .001)
+        done = False
+        while(not done):
+            print("New Epoch")
+            total_loss = 0
+            for batch in dataloader:
+                #print(batch)
+                x = batch['x']
+                y = batch['label']
+                x = movedim(x,1,0)
+                loss = self.get_loss(x, y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                #print(dataset)
 
-        
+            acc = dataset.get_validation_accuracy() 
+            if acc >= 0.81:  
+                done = True
+                print("done")
+            else: print(f"Fuck you, with accuracy of: {acc}")
 
 def Convolve(input: tensor, weight: tensor):
     """
@@ -355,7 +413,6 @@ def Convolve(input: tensor, weight: tensor):
     Output_Tensor = tensor(())
     "*** YOUR CODE HERE ***"
 
-    
     "*** End Code ***"
     return Output_Tensor
 
