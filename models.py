@@ -392,8 +392,8 @@ class LanguageIDModel(Module):
             acc = dataset.get_validation_accuracy() 
             if acc >= 0.81:  
                 done = True
-                print("done")
-            else: print(f"Fuck you, with accuracy of: {acc}")
+                print("Accuracy over 81%, returning")
+            else: print(f"Failed, with accuracy of: {acc}")
 
 def Convolve(input: tensor, weight: tensor):
     """
