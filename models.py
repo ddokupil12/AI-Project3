@@ -387,7 +387,7 @@ def Convolve(input: tensor, weight: tensor): # Q5
     "*** YOUR CODE HERE ***"
     # print('input', input_tensor_dimensions)
     # print('weight', weight_dimensions)
-    print('Convolve')
+    # print('Convolve')
     # for i in input_tensor_dimensions:
     #     print('i', i)
     # for i in input:
@@ -414,8 +414,8 @@ def Convolve(input: tensor, weight: tensor): # Q5
 
     inputHeight, inputWidth = input_tensor_dimensions
     weightHeight, weightWidth = weight_dimensions
-    outputHeight = (inputHeight - weightHeight)
-    outputWidth = (inputWidth - weightWidth)
+    outputHeight = (inputHeight - weightHeight) + 1
+    outputWidth = (inputWidth - weightWidth) + 1
 
     Output_Tensor = torch.zeros(outputHeight, outputWidth)
 
@@ -425,7 +425,14 @@ def Convolve(input: tensor, weight: tensor): # Q5
             Output_Tensor[i, k] = torch.sum(window * weight)
 
     # print('output...')
-    print(Output_Tensor.shape)
+    # print(Output_Tensor.shape)
+    # if Output_Tensor.shape < weight_dimensions:
+    #     print("output < weight")
+    # else:
+    #     print("output >= weight")
+
+    # if Output_Tensor.shape < input_tensor_dimensions:
+    #     print("Output < input")
 
     # print(Output_Tensor)
     "*** End Code ***"
@@ -455,8 +462,9 @@ class DigitConvolutionalModel(Module): # Q5
         print('init')
         # input_size = 28 * 28
         # self.layer1 = Linear(input_size,128)
-        self.layer1 = Linear(625, 256)
-        self.layer2 = Linear(256, output_size)
+        self.layer1 = Linear(676, 256)
+        self.layer2 = Linear(256, 128)
+        self.layer3 = Linear(128, output_size)
 
 
 
@@ -469,7 +477,7 @@ class DigitConvolutionalModel(Module): # Q5
         The convolutional layer is already applied, and the output is flattened for you. You should treat x as
         a regular 1-dimentional datapoint now, similar to the previous questions.
         """
-        print('Forward')
+        # print('Forward')
         x = x.reshape(len(x), 28, 28)
         x = stack(list(map(lambda sample: Convolve(sample, self.convolution_weights), x)))
         x = x.flatten(start_dim=1)
@@ -477,6 +485,7 @@ class DigitConvolutionalModel(Module): # Q5
         # x = x.view(x.size(0), -1)
         x = relu(self.layer1(x))
         x = relu(self.layer2(x))
+        x = relu(self.layer3(x))
 
         return x
 
@@ -495,7 +504,7 @@ class DigitConvolutionalModel(Module): # Q5
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-        print('loss')
+        # print('loss')
         forwardX = self.forward(x)
         loss = cross_entropy(forwardX, y)
         return loss
@@ -508,9 +517,9 @@ class DigitConvolutionalModel(Module): # Q5
         Trains the model.
         """
         """ YOUR CODE HERE """
-        print('train')
+        # print('train')
         dataloader = DataLoader(dataset, batch_size=784, shuffle=True)
-        optimizer = optim.Adam(self.parameters(), lr=0.01)
+        optimizer = optim.Adam(self.parameters(), lr=0.001)
         done = False
         while not done:
             # Train model
@@ -522,10 +531,12 @@ class DigitConvolutionalModel(Module): # Q5
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            data_x = torch.tensor(dataset.x,dtype=torch.float32)
-            labels = torch.tensor(dataset.y, dtype=torch.float32)
+            # data_x = torch.tensor(dataset.x,dtype=torch.float32)
+            # labels = torch.tensor(dataset.y, dtype=torch.float32)
             #self.get_loss(data_x, labels)
-            if (dataset.get_validation_accuracy() > .97):
+            check = dataset.get_validation_accuracy()
+            # check = 0.81
+            if (check >= 0.80):
                 done = True
             else:
                 done = False
