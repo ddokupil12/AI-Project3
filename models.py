@@ -126,7 +126,7 @@ class RegressionModel(Module):
         x = relu(self.layer1(x))
         x = relu(self.layer2(x))
         return self.output(x)
-      
+
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -387,7 +387,7 @@ def Convolve(input: tensor, weight: tensor): # Q5
     "*** YOUR CODE HERE ***"
     # print('input', input_tensor_dimensions)
     # print('weight', weight_dimensions)
-    print('output...')
+    print('Convolve')
     # for i in input_tensor_dimensions:
     #     print('i', i)
     # for i in input:
@@ -424,10 +424,10 @@ def Convolve(input: tensor, weight: tensor): # Q5
             window = input[i:i + weightHeight, k:k + weightWidth]
             Output_Tensor[i, k] = torch.sum(window * weight)
 
-
+    # print('output...')
     print(Output_Tensor.shape)
 
-    print(Output_Tensor)
+    # print(Output_Tensor)
     "*** End Code ***"
     return Output_Tensor
 
@@ -452,6 +452,13 @@ class DigitConvolutionalModel(Module): # Q5
 
         self.convolution_weights = Parameter(ones((3, 3)))
         """ YOUR CODE HERE """
+        print('init')
+        # input_size = 28 * 28
+        # self.layer1 = Linear(input_size,128)
+        self.layer1 = Linear(625, 256)
+        self.layer2 = Linear(256, output_size)
+
+
 
 
     def run(self, x):
@@ -462,10 +469,16 @@ class DigitConvolutionalModel(Module): # Q5
         The convolutional layer is already applied, and the output is flattened for you. You should treat x as
         a regular 1-dimentional datapoint now, similar to the previous questions.
         """
+        print('Forward')
         x = x.reshape(len(x), 28, 28)
         x = stack(list(map(lambda sample: Convolve(sample, self.convolution_weights), x)))
         x = x.flatten(start_dim=1)
         """ YOUR CODE HERE """
+        # x = x.view(x.size(0), -1)
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+
+        return x
 
 
     def get_loss(self, x, y):
@@ -482,6 +495,10 @@ class DigitConvolutionalModel(Module): # Q5
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
+        print('loss')
+        forwardX = self.forward(x)
+        loss = cross_entropy(forwardX, y)
+        return loss
 
 
 
@@ -491,6 +508,27 @@ class DigitConvolutionalModel(Module): # Q5
         Trains the model.
         """
         """ YOUR CODE HERE """
+        print('train')
+        dataloader = DataLoader(dataset, batch_size=784, shuffle=True)
+        optimizer = optim.Adam(self.parameters(), lr=0.01)
+        done = False
+        while not done:
+            # Train model
+            print("still training")
+            for batch in dataloader:
+                x = batch['x']
+                y = batch['label']
+                loss = self.get_loss(x, y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            data_x = torch.tensor(dataset.x,dtype=torch.float32)
+            labels = torch.tensor(dataset.y, dtype=torch.float32)
+            #self.get_loss(data_x, labels)
+            if (dataset.get_validation_accuracy() > .97):
+                done = True
+            else:
+                done = False
 
 
 
