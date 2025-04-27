@@ -36,8 +36,7 @@ class PerceptronModel(Module):
         Hint: You can use ones(dim) to create a tensor of dimension dim.
         """
         super(PerceptronModel, self).__init__()
-
-        "*** YOUR CODE HERE ***"
+        self.w = Parameter(ones(1, dimensions), False)
 
 
     def get_weights(self):
@@ -57,6 +56,7 @@ class PerceptronModel(Module):
         The pytorch function `tensordot` may be helpful here.
         """
         "*** YOUR CODE HERE ***"
+        return tensordot(x,self.get_weights())
 
 
     def get_prediction(self, x):
@@ -66,7 +66,11 @@ class PerceptronModel(Module):
         Returns: 1 or -1
         """
         "*** YOUR CODE HERE ***"
-
+        r = self.run(x)
+        if (r<0):
+            return -1
+        else:
+            return 1
 
 
     def train(self, dataset):
@@ -80,7 +84,17 @@ class PerceptronModel(Module):
         """
         with no_grad():
             dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
-            "*** YOUR CODE HERE ***"
+            done = False
+            while (not done):
+                done = True
+                for sample in dataloader:
+                    x = sample['x']
+                    "print(x)"
+                    y = sample['label']
+                    if self.get_prediction(x) != y:
+                        self.w += (x*y).squeeze(0)
+                        done = False
+
 
 
 
@@ -94,7 +108,9 @@ class RegressionModel(Module):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
         super().__init__()
-
+        self.layer1 = Linear(1, 100)
+        self.layer2 = Linear(100, 100)
+        self.output = Linear(100, 1)
 
 
     def forward(self, x):
@@ -107,8 +123,10 @@ class RegressionModel(Module):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-
-
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+        return self.output(x)
+      
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -120,8 +138,8 @@ class RegressionModel(Module):
         Returns: a tensor of size 1 containing the loss
         """
         "*** YOUR CODE HERE ***"
-
-
+        predictions = self.forward(x)
+        return mse_loss(predictions, y)
 
     def train(self, dataset):
         """
@@ -138,8 +156,23 @@ class RegressionModel(Module):
             
         """
         "*** YOUR CODE HERE ***"
-
-
+        dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+        optimizer = optim.Adam(self.parameters(), lr=0.01)
+        done = False
+        while(not done):
+            for batch in dataloader:
+                x = batch['x']
+                y = batch['label']
+                loss = self.get_loss(x, y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            data_x = torch.tensor(dataset.x,dtype=torch.float32)
+            labels = torch.tensor(dataset.y, dtype=torch.float32)
+            if (self.get_loss(data_x, labels) < .02):
+                done = True
+            else:
+                done = False
 
 
 
@@ -160,16 +193,28 @@ class DigitClassificationModel(Module):
     (See RegressionModel for more information about the APIs of different
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
+
+    Use a CNN
     """
     def __init__(self):
         # Initialize your model parameters here
         super().__init__()
         input_size = 28 * 28
+        hidden_state = 3 * 3 #This is slightly random but I think it a good middle between 2 and 5
         output_size = 10
         "*** YOUR CODE HERE ***"
+        "We need a input, convotion layer, pooling layer, activation layer and output"
+        self.layer1 = Linear(input_size,256)
+        self.layer2 = Linear(256,128)
+        self.layer3 = Linear(128,output_size)
 
-
-
+    def forward(self,x):
+        "*** YOUR CODE HERE ***"
+        x = x.view(x.size(0), -1)
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+        x = self.layer3(x)
+        return x
 
     def run(self, x):
         """
@@ -186,7 +231,7 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
-
+        return self.forward(x)
 
 
     def get_loss(self, x, y):
@@ -203,15 +248,37 @@ class DigitClassificationModel(Module):
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-
-
-
+        forwardX = self.forward(x)
+        loss = cross_entropy(forwardX, y)
+        return loss
 
     def train(self, dataset):
         """
         Trains the model.
         """
         """ YOUR CODE HERE """
+        dataloader = DataLoader(dataset, batch_size=784, shuffle=True)
+        optimizer = optim.Adam(self.parameters(), lr=0.01)
+        done = False
+        while not done:
+            # Train model
+            print("still training")
+            for batch in dataloader:
+                x = batch['x']
+                y = batch['label']
+                loss = self.get_loss(x, y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            data_x = torch.tensor(dataset.x,dtype=torch.float32)
+            labels = torch.tensor(dataset.y, dtype=torch.float32)
+            #self.get_loss(data_x, labels)
+            if (dataset.get_validation_accuracy() > .97):
+                done = True
+            else:
+                done = False
+
+
 
 
 
