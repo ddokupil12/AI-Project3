@@ -203,10 +203,8 @@ class DigitClassificationModel(Module):
         # Initialize your model parameters here
         super().__init__()
         input_size = 28 * 28
-        hidden_state = 3 * 3 #This is slightly random but I think it a good middle between 2 and 5
         output_size = 10
         "*** YOUR CODE HERE ***"
-        "We need a input, convotion layer, pooling layer, activation layer and output"
         self.layer1 = Linear(input_size,256)
         self.layer2 = Linear(256,128)
         self.layer3 = Linear(128,output_size)
@@ -266,7 +264,6 @@ class DigitClassificationModel(Module):
         done = False
         while not done:
             # Train model
-            print("still training")
             for batch in dataloader:
                 x = batch['x']
                 y = batch['label']
