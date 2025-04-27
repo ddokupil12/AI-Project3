@@ -36,8 +36,7 @@ class PerceptronModel(Module):
         Hint: You can use ones(dim) to create a tensor of dimension dim.
         """
         super(PerceptronModel, self).__init__()
-        
-        "*** YOUR CODE HERE ***"
+        self.w = Parameter(ones(1, dimensions), False)
         
 
     def get_weights(self):
@@ -57,6 +56,7 @@ class PerceptronModel(Module):
         The pytorch function `tensordot` may be helpful here.
         """
         "*** YOUR CODE HERE ***"
+        return tensordot(x,self.get_weights())
         
 
     def get_prediction(self, x):
@@ -66,7 +66,11 @@ class PerceptronModel(Module):
         Returns: 1 or -1
         """
         "*** YOUR CODE HERE ***"
-
+        r = self.run(x)
+        if (r<0):
+            return -1
+        else:
+            return 1
 
 
     def train(self, dataset):
@@ -80,8 +84,18 @@ class PerceptronModel(Module):
         """        
         with no_grad():
             dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
-            "*** YOUR CODE HERE ***"
-
+            done = False
+            while (not done):
+                done = True
+                for sample in dataloader:
+                    x = sample['x']
+                    "print(x)"
+                    y = sample['label']
+                    if self.get_prediction(x) != y:
+                        self.w += (x*y).squeeze(0)
+                        done = False
+                        
+                    
 
 
 class RegressionModel(Module):
@@ -94,7 +108,9 @@ class RegressionModel(Module):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
         super().__init__()
-
+        self.layer1 = Linear(1, 100)
+        self.layer2 = Linear(100, 100)
+        self.output = Linear(100, 1)
 
 
     def forward(self, x):
@@ -107,7 +123,9 @@ class RegressionModel(Module):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+        return self.output(x)
     
     def get_loss(self, x, y):
         """
@@ -120,7 +138,8 @@ class RegressionModel(Module):
         Returns: a tensor of size 1 containing the loss
         """
         "*** YOUR CODE HERE ***"
- 
+        predictions = self.forward(x)
+        return mse_loss(predictions, y)
         
 
     def train(self, dataset):
@@ -138,6 +157,23 @@ class RegressionModel(Module):
             
         """
         "*** YOUR CODE HERE ***"
+        dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+        optimizer = optim.Adam(self.parameters(), lr=0.01)
+        done = False
+        while(not done):
+            for batch in dataloader:
+                x = batch['x']
+                y = batch['label']
+                loss = self.get_loss(x, y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            data_x = torch.tensor(dataset.x,dtype=torch.float32)
+            labels = torch.tensor(dataset.y, dtype=torch.float32)
+            if (self.get_loss(data_x, labels) < .02):
+                done = True 
+            else:
+                done = False
 
             
 
