@@ -126,7 +126,7 @@ class RegressionModel(Module):
         x = relu(self.layer1(x))
         x = relu(self.layer2(x))
         return self.output(x)
-
+      
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -140,7 +140,6 @@ class RegressionModel(Module):
         "*** YOUR CODE HERE ***"
         predictions = self.forward(x)
         return mse_loss(predictions, y)
-
 
     def train(self, dataset):
         """
@@ -174,8 +173,6 @@ class RegressionModel(Module):
                 done = True
             else:
                 done = False
-
-
 
 
 
@@ -235,7 +232,6 @@ class DigitClassificationModel(Module):
         """
         """ YOUR CODE HERE """
         return self.forward(x)
-
 
 
     def get_loss(self, x, y):
@@ -372,7 +368,7 @@ class LanguageIDModel(Module):
 
 
 
-def Convolve(input: tensor, weight: tensor):
+def Convolve(input: tensor, weight: tensor): # Q5
     """
     Acts as a convolution layer by applying a 2d convolution with the given inputs and weights.
     DO NOT import any pytorch methods to directly do this, the convolution must be done with only the functions
@@ -383,20 +379,60 @@ def Convolve(input: tensor, weight: tensor):
 
     tensor[y:y+height, x:x+width]
 
-    This returns a subtensor who's first element is tensor[y,x] and has height 'height, and width 'width'
+    This returns a subtensor who's first element is tensor[y,x] and has height 'height', and width 'width'
     """
     input_tensor_dimensions = input.shape
     weight_dimensions = weight.shape
     Output_Tensor = tensor(())
     "*** YOUR CODE HERE ***"
+    # print('input', input_tensor_dimensions)
+    # print('weight', weight_dimensions)
+    print('output...')
+    # for i in input_tensor_dimensions:
+    #     print('i', i)
+    # for i in input:
+    #     print('i', i)
+    #     for k in i:
+    #         print('k', k)
+    # height = weight_dimensions[0]
+    # width = weight_dimensions[1]
+    # tempi = []
+    # for i in range(height):
+    #     tempk = []
+    #     for k in range(width):
+    #         dot = tensordot(input[i:i + height, k: k + width], weight, dims=1)
+    #         tempk.append(dot)
+    #         print(dot)
 
 
+    #     tempKStack = torch.stack(tempk)
+        # tempi.append(tempKStack)
+        # print('tempkstack', tempKStack)
+
+    # Add temp to output tensor
+    # Output_Tensor = torch.stack(tempi)
+
+    inputHeight, inputWidth = input_tensor_dimensions
+    weightHeight, weightWidth = weight_dimensions
+    outputHeight = (inputHeight - weightHeight)
+    outputWidth = (inputWidth - weightWidth)
+
+    Output_Tensor = torch.zeros(outputHeight, outputWidth)
+
+    for i in range(outputHeight):
+        for k in range(outputWidth):
+            window = input[i:i + weightHeight, k:k + weightWidth]
+            Output_Tensor[i, k] = torch.sum(window * weight)
+
+
+    print(Output_Tensor.shape)
+
+    print(Output_Tensor)
     "*** End Code ***"
     return Output_Tensor
 
 
-
-class DigitConvolutionalModel(Module):
+class DigitConvolutionalModel(Module): # Q5
     """
     A model for handwritten digit classification using the MNIST dataset.
 
@@ -416,8 +452,6 @@ class DigitConvolutionalModel(Module):
 
         self.convolution_weights = Parameter(ones((3, 3)))
         """ YOUR CODE HERE """
-
-
 
 
     def run(self, x):
