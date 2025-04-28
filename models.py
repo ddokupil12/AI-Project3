@@ -37,7 +37,7 @@ class PerceptronModel(Module):
         """
         super(PerceptronModel, self).__init__()
         self.w = Parameter(ones(1, dimensions), False)
-        
+
 
     def get_weights(self):
         """
@@ -57,7 +57,7 @@ class PerceptronModel(Module):
         """
         "*** YOUR CODE HERE ***"
         return tensordot(x,self.get_weights())
-        
+
 
     def get_prediction(self, x):
         """
@@ -81,7 +81,7 @@ class PerceptronModel(Module):
 
         Each sample in the dataloader is in the form {'x': features, 'label': label} where label
         is the item we need to predict based off of its features.
-        """        
+        """
         with no_grad():
             dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
             done = False
@@ -94,8 +94,8 @@ class PerceptronModel(Module):
                     if self.get_prediction(x) != y:
                         self.w += (x*y).squeeze(0)
                         done = False
-                        
-                    
+
+
 
 
 class RegressionModel(Module):
@@ -126,7 +126,7 @@ class RegressionModel(Module):
         x = relu(self.layer1(x))
         x = relu(self.layer2(x))
         return self.output(x)
-    
+
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -140,7 +140,7 @@ class RegressionModel(Module):
         "*** YOUR CODE HERE ***"
         predictions = self.forward(x)
         return mse_loss(predictions, y)
-        
+
 
     def train(self, dataset):
         """
@@ -172,11 +172,11 @@ class RegressionModel(Module):
             data_x = torch.tensor(dataset.x,dtype=torch.float32)
             labels = torch.tensor(dataset.y, dtype=torch.float32)
             if (self.get_loss(data_x, labels) < .02):
-                done = True 
+                done = True
             else:
                 done = False
 
-            
+
 
 
 
@@ -197,6 +197,8 @@ class DigitClassificationModel(Module):
     (See RegressionModel for more information about the APIs of different
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
+
+    Use a CNN
     """
     def __init__(self):
         # Initialize your model parameters here
@@ -204,9 +206,17 @@ class DigitClassificationModel(Module):
         input_size = 28 * 28
         output_size = 10
         "*** YOUR CODE HERE ***"
+        self.layer1 = Linear(input_size,256)
+        self.layer2 = Linear(256,128)
+        self.layer3 = Linear(128,output_size)
 
-
-
+    def forward(self,x):
+        "*** YOUR CODE HERE ***"
+        x = x.view(x.size(0), -1)
+        x = relu(self.layer1(x))
+        x = relu(self.layer2(x))
+        x = self.layer3(x)
+        return x
 
     def run(self, x):
         """
@@ -223,8 +233,9 @@ class DigitClassificationModel(Module):
                 (also called logits)
         """
         """ YOUR CODE HERE """
+        return self.forward(x)
 
- 
+
 
     def get_loss(self, x, y):
         """
@@ -240,15 +251,36 @@ class DigitClassificationModel(Module):
         Returns: a loss tensor
         """
         """ YOUR CODE HERE """
-
-    
-        
+        forwardX = self.forward(x)
+        loss = cross_entropy(forwardX, y)
+        return loss
 
     def train(self, dataset):
         """
         Trains the model.
         """
         """ YOUR CODE HERE """
+        dataloader = DataLoader(dataset, batch_size=784, shuffle=True)
+        optimizer = optim.Adam(self.parameters(), lr=0.01)
+        done = False
+        while not done:
+            # Train model
+            for batch in dataloader:
+                x = batch['x']
+                y = batch['label']
+                loss = self.get_loss(x, y)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            data_x = torch.tensor(dataset.x,dtype=torch.float32)
+            labels = torch.tensor(dataset.y, dtype=torch.float32)
+            #self.get_loss(data_x, labels)
+            if (dataset.get_validation_accuracy() > .97):
+                done = True
+            else:
+                done = False
+
+
 
 
 
@@ -306,6 +338,7 @@ class LanguageIDModel(Module):
         """
         "*** YOUR CODE HERE ***"
 
+
         val = []
         #print("Test test test here")
         for x in range(0,len(xs)):
@@ -317,7 +350,7 @@ class LanguageIDModel(Module):
         #print("Got Here")
         output = self.output(hiddenLayer)
         return output
-    
+
     def get_loss(self, xs, y):
         """
         Computes the loss for a batch of examples.
@@ -333,12 +366,14 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+
         predictions = self.run(xs)
         target = torch.argmax(y, dim=1)
         # print(target)
         loss = cross_entropy(predictions, target)
         #print(loss)
         return loss
+
 
     def train(self, dataset):
         """
@@ -389,12 +424,13 @@ class LanguageIDModel(Module):
                 optimizer.step()
                 #print(dataset)
 
+
             acc = dataset.get_validation_accuracy() 
             if acc >= 0.81:  
                 done = True
                 print("Accuracy over 81%, returning")
             else: print(f"Failed, with accuracy of: {acc}")
-
+              
 def Convolve(input: tensor, weight: tensor):
     """
     Acts as a convolution layer by applying a 2d convolution with the given inputs and weights.
@@ -413,6 +449,7 @@ def Convolve(input: tensor, weight: tensor):
     Output_Tensor = tensor(())
     "*** YOUR CODE HERE ***"
 
+
     "*** End Code ***"
     return Output_Tensor
 
@@ -429,7 +466,7 @@ class DigitConvolutionalModel(Module):
     Note that this class looks different from a standard pytorch model since we don't need to train it
     as it will be run on preset weights.
     """
-    
+
 
     def __init__(self):
         # Initialize your model parameters here
@@ -444,7 +481,7 @@ class DigitConvolutionalModel(Module):
 
     def run(self, x):
         return self(x)
- 
+
     def forward(self, x):
         """
         The convolutional layer is already applied, and the output is flattened for you. You should treat x as
@@ -471,8 +508,8 @@ class DigitConvolutionalModel(Module):
         """
         """ YOUR CODE HERE """
 
-     
-        
+
+
 
     def train(self, dataset):
         """
@@ -498,7 +535,7 @@ class Attention(Module):
         #Masking part of attention layer
         self.register_buffer("mask", torch.tril(torch.ones(block_size, block_size))
                                      .view(1, 1, block_size, block_size))
-       
+
         self.layer_size = layer_size
 
 
@@ -518,5 +555,3 @@ class Attention(Module):
         B, T, C = input.size()
 
         """YOUR CODE HERE"""
-
-     
