@@ -164,11 +164,10 @@ class RegressionModel(Module):
                 x = batch['x']
                 y = batch['label']
                 loss = self.get_loss(x, y)
-                print(loss)
+                # print(loss)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                
             data_x = torch.tensor(dataset.x,dtype=torch.float32)
             labels = torch.tensor(dataset.y, dtype=torch.float32)
             if (self.get_loss(data_x, labels) < .02):
@@ -176,8 +175,12 @@ class RegressionModel(Module):
             else:
                 done = False
 
-                
-                
+
+
+
+
+
+
 class DigitClassificationModel(Module):
     """
     A model for handwritten digit classification using the MNIST dataset.
@@ -201,12 +204,14 @@ class DigitClassificationModel(Module):
         hidden_state = 3 * 3 #This is slightly random but I think it a good middle between 2 and 5
         output_size = 10
         "*** YOUR CODE HERE ***"
+
         self.layer1 = Linear(input_size,256)
         self.layer2 = Linear(256,128)
         self.layer3 = Linear(128,output_size)
 
     def forward(self,x):
         "*** YOUR CODE HERE ***"
+
         x = x.view(x.size(0), -1)
         x = relu(self.layer1(x))
         x = relu(self.layer2(x))
@@ -229,6 +234,7 @@ class DigitClassificationModel(Module):
         """
         """ YOUR CODE HERE """
         return self.forward(x)
+
 
     def get_loss(self, x, y):
         """
@@ -258,6 +264,7 @@ class DigitClassificationModel(Module):
         done = False
         while not done:
             # Train model
+            # print("still training")
             for batch in dataloader:
                 x = batch['x']
                 y = batch['label']
@@ -265,9 +272,7 @@ class DigitClassificationModel(Module):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            data_x = torch.tensor(dataset.x,dtype=torch.float32)
-            labels = torch.tensor(dataset.y, dtype=torch.float32)
-            #self.get_loss(data_x, labels)
+
             if (dataset.get_validation_accuracy() > .97):
                 done = True
             else:
@@ -359,14 +364,12 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
-
         predictions = self.run(xs)
         target = torch.argmax(y, dim=1)
         # print(target)
         loss = cross_entropy(predictions, target)
         #print(loss)
         return loss
-
 
     def train(self, dataset):
         """
@@ -383,28 +386,12 @@ class LanguageIDModel(Module):
         For more information, look at the pytorch documentation of torch.movedim()
         """
         "*** YOUR CODE HERE ***"
-        #        dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
-        # optimizer = optim.Adam(self.parameters(), lr=0.01)
-        # done = False
-        # while(not done):
-        #     for batch in dataloader:
-        #         x = batch['x']
-        #         y = batch['label']
-        #         loss = self.get_loss(x, y)
-        #         optimizer.zero_grad()
-        #         loss.backward()
-        #         optimizer.step()
-        #     data_x = torch.tensor(dataset.x,dtype=torch.float32)
-        #     labels = torch.tensor(dataset.y, dtype=torch.float32)
-        #     if (self.get_loss(data_x, labels) < .02):
-        #         done = True 
-        #     else:
-        #         done = False
+
         dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
         optimizer = optim.Adam(self.parameters(), lr = .001)
         done = False
         while(not done):
-            print("New Epoch")
+            # print("New Epoch")
             total_loss = 0
             for batch in dataloader:
                 #print(batch)
@@ -415,19 +402,16 @@ class LanguageIDModel(Module):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                #print(dataset)
 
 
-            acc = dataset.get_validation_accuracy() 
-            if acc >= 0.81:  
+            acc = dataset.get_validation_accuracy()
+            if acc >= 0.81:
                 done = True
                 print("Accuracy over 81%, returning")
             else: print(f"Failed, with accuracy of: {acc}")
 
-              
 
 def Convolve(input: tensor, weight: tensor): # Q5
-
     """
     Acts as a convolution layer by applying a 2d convolution with the given inputs and weights.
     DO NOT import any pytorch methods to directly do this, the convolution must be done with only the functions
@@ -457,9 +441,9 @@ def Convolve(input: tensor, weight: tensor): # Q5
             window = input[i:i + weightHeight, k:k + weightWidth]
             Output_Tensor[i, k] = torch.sum(window * weight)
 
-            
     "*** End Code ***"
     return Output_Tensor
+
 
 class DigitConvolutionalModel(Module): # Q5
     """
@@ -481,7 +465,6 @@ class DigitConvolutionalModel(Module): # Q5
 
         self.convolution_weights = Parameter(ones((3, 3)))
         """ YOUR CODE HERE """
-        print('init')
 
         self.layer1 = Linear(676, 512)
         self.layer2 = Linear(512, 256)
@@ -526,10 +509,10 @@ class DigitConvolutionalModel(Module): # Q5
         """
         """ YOUR CODE HERE """
 
-
         forwardX = self.forward(x)
         loss = cross_entropy(forwardX, y)
         return loss
+
 
 
 
@@ -544,7 +527,7 @@ class DigitConvolutionalModel(Module): # Q5
         done = False
         while not done:
             # Train model
-            # print("still training")
+
             for batch in dataloader:
                 x = batch['x']
                 y = batch['label']
