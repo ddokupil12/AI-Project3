@@ -168,6 +168,7 @@ class RegressionModel(Module):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+                
             data_x = torch.tensor(dataset.x,dtype=torch.float32)
             labels = torch.tensor(dataset.y, dtype=torch.float32)
             if (self.get_loss(data_x, labels) < .02):
@@ -175,12 +176,8 @@ class RegressionModel(Module):
             else:
                 done = False
 
-
-
-
-
-
-
+                
+                
 class DigitClassificationModel(Module):
     """
     A model for handwritten digit classification using the MNIST dataset.
@@ -204,7 +201,6 @@ class DigitClassificationModel(Module):
         hidden_state = 3 * 3 #This is slightly random but I think it a good middle between 2 and 5
         output_size = 10
         "*** YOUR CODE HERE ***"
-        "We need a input, convotion layer, pooling layer, activation layer and output"
         self.layer1 = Linear(input_size,256)
         self.layer2 = Linear(256,128)
         self.layer3 = Linear(128,output_size)
@@ -234,7 +230,6 @@ class DigitClassificationModel(Module):
         """ YOUR CODE HERE """
         return self.forward(x)
 
-
     def get_loss(self, x, y):
         """
         Computes the loss for a batch of examples.
@@ -263,7 +258,6 @@ class DigitClassificationModel(Module):
         done = False
         while not done:
             # Train model
-            print("still training")
             for batch in dataloader:
                 x = batch['x']
                 y = batch['label']
@@ -349,7 +343,7 @@ class LanguageIDModel(Module):
         #print("Got Here")
         output = self.output(hiddenLayer)
         return output
-    
+
     def get_loss(self, xs, y):
         """
         Computes the loss for a batch of examples.
@@ -365,12 +359,14 @@ class LanguageIDModel(Module):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+
         predictions = self.run(xs)
         target = torch.argmax(y, dim=1)
         # print(target)
         loss = cross_entropy(predictions, target)
         #print(loss)
         return loss
+
 
     def train(self, dataset):
         """
@@ -428,8 +424,10 @@ class LanguageIDModel(Module):
                 print("Accuracy over 81%, returning")
             else: print(f"Failed, with accuracy of: {acc}")
 
+              
 
 def Convolve(input: tensor, weight: tensor): # Q5
+
     """
     Acts as a convolution layer by applying a 2d convolution with the given inputs and weights.
     DO NOT import any pytorch methods to directly do this, the convolution must be done with only the functions
@@ -447,7 +445,6 @@ def Convolve(input: tensor, weight: tensor): # Q5
     Output_Tensor = tensor(())
     "*** YOUR CODE HERE ***"
 
-
     inputHeight, inputWidth = input_tensor_dimensions
     weightHeight, weightWidth = weight_dimensions
     outputHeight = (inputHeight - weightHeight) + 1
@@ -460,9 +457,9 @@ def Convolve(input: tensor, weight: tensor): # Q5
             window = input[i:i + weightHeight, k:k + weightWidth]
             Output_Tensor[i, k] = torch.sum(window * weight)
 
+            
     "*** End Code ***"
     return Output_Tensor
-
 
 class DigitConvolutionalModel(Module): # Q5
     """
@@ -529,10 +526,10 @@ class DigitConvolutionalModel(Module): # Q5
         """
         """ YOUR CODE HERE """
 
+
         forwardX = self.forward(x)
         loss = cross_entropy(forwardX, y)
         return loss
-
 
 
 
