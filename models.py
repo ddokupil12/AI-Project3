@@ -486,9 +486,9 @@ class DigitConvolutionalModel(Module): # Q5
         """ YOUR CODE HERE """
         print('init')
 
-        self.layer1 = Linear(676, 256)
-        self.layer2 = Linear(256, 128)
-        self.layer3 = Linear(128, output_size)
+        self.layer1 = Linear(676, 512)
+        self.layer2 = Linear(512, 256)
+        self.layer3 = Linear(256, output_size)
 
 
 
