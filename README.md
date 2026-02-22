@@ -1,4 +1,4 @@
-# [DEPRECATED] AI-Project 3
+# AI-Project 3
 
 This is a class project. Do not copy code from this repository if you are doing the same project.
 
