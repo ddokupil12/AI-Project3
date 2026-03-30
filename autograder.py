@@ -51,15 +51,14 @@ class Tracker(object):
 
     def begin_q(self, q):
         assert q in self.questions
-        text = 'Question {}'.format(q)
+        text = f'Question {q}'
         print('\n' + text)
         print('=' * len(text))
 
         for prereq in sorted(self.prereqs[q]):
             if self.points[prereq] < self.maxes[prereq]:
-                print("""*** NOTE: Make sure to complete Question {} before working on Question {},
-*** because Question {} builds upon your answer for Question {}.
-""".format(prereq, q, q, prereq))
+                print(f"""*** NOTE: Make sure to complete Question {prereq} before working on Question {q},
+*** because Question {q} builds upon your answer for Question {prereq}.""")
                 return False
 
         self.current_question = q
@@ -69,7 +68,7 @@ class Tracker(object):
     def begin_test(self, test_name):
         self.current_test = test_name
         self.points_at_test_start = self.points[self.current_question]
-        print("*** {}) {}".format(self.current_question, self.current_test))
+        print(f"*** {self.current_question}) {self.current_test}")
         if self.mute_output:
             self.mute()
 
@@ -78,7 +77,7 @@ class Tracker(object):
             self.unmute()
         self.possible_points_remaining -= pts
         if self.points[self.current_question] == self.points_at_test_start + pts:
-            print("*** PASS: {}".format(self.current_test))
+            print(f"*** PASS: {self.current_test}")
         elif self.points[self.current_question] == self.points_at_test_start:
             print("*** FAIL")
 
@@ -88,10 +87,7 @@ class Tracker(object):
     def end_q(self):
         assert self.current_question is not None
         assert self.possible_points_remaining == 0
-        print('\n### Question {}: {}/{} ###'.format(
-            self.current_question,
-            self.points[self.current_question],
-            self.maxes[self.current_question]))
+        print(f'\n### Question {self.current_question}: {self.points[self.current_question]}/{self.maxes[self.current_question]} ###')
 
         self.current_question = None
         self.possible_points_remaining = None
@@ -187,7 +183,7 @@ def main():
     questions = list(sorted(questions))
     if options.grade_question:
         if options.grade_question not in questions:
-            print("ERROR: question {} does not exist".format(options.grade_question))
+            print(f"ERROR: question {options.grade_question} does not exist")
             sys.exit(1)
         else:
             questions = [options.grade_question]
@@ -259,29 +255,25 @@ def no_graphics():
 def verify_node(node, expected_type, expected_shape, method_name):
     if expected_type == 'parameter':
         assert node is not None, (
-            "{} should return an instance of nn.Parameter, not None".format(method_name))
+            f"{method_name} should return an instance of nn.Parameter, not None")
         assert isinstance(node, nn.Parameter), (
-            "{} should return an instance of nn.Parameter, instead got type {!r}".format(
-            method_name, type(node).__name__))
+            f"{method_name} should return an instance of nn.Parameter, instead got type {type(node).__name__!r}")
     elif expected_type == 'loss':
         assert node is not None, (
-            "{} should return an instance a loss node, not None".format(method_name))
+            f"{method_name} should return an instance a loss node, not None")
         assert isinstance(node, (nn.modules.loss._Loss)), (
-            "{} should return a loss node, instead got type {!r}".format(
-            method_name, type(node).__name__))
+            f"{method_name} should return a loss node, instead got type {type(node).__name__!r}")
     elif expected_type == 'tensor':
         assert node is not None, (
-            "{} should return a node object, not None".format(method_name))
+            f"{method_name} should return a node object, not None")
         assert isinstance(node, Tensor), (
-            "{} should return a node object, instead got type {!r}".format(
-            method_name, type(node).__name__))
+            f"{method_name} should return a node object, instead got type {type(node).__name__!r}")
     else:
         assert False, "If you see this message, please report a bug in the autograder"
 
     if expected_type != 'loss':
-        assert all([(expected is '?' or actual == expected) for (actual, expected) in zip(node.detach().numpy().shape, expected_shape)]), (
-            "{} should return an object with shape {}, got {}".format(
-                method_name, expected_shape, node.shape))
+        assert all([(expected == '?' or actual == expected) for (actual, expected) in zip(node.detach().numpy().shape, expected_shape)]), (
+            f"{method_name} should return an object with shape {expected_shape}, got {node.shape}")
 
 @test('q1', points=6)
 def check_perceptron(tracker):
@@ -316,8 +308,7 @@ def check_perceptron(tracker):
             expected_score = float(np.dot(point.flatten(), param.detach().numpy().flatten()))
 
         assert np.isclose(calculated_score, expected_score), (
-            "The score computed by PerceptronModel.run() ({:.4f}) does not match the expected score ({:.4f})".format(
-            calculated_score, expected_score))
+            f"The score computed by PerceptronModel.run() ({calculated_score:.4f}) does not match the expected score ({expected_score:.4f})")
 
     # Check that get_prediction returns the correct values, including the
     # case when a point lies exactly on the decision boundary
@@ -327,13 +318,11 @@ def check_perceptron(tracker):
         for point in (random_point, np.zeros_like(random_point)):
             prediction = p.get_prediction(Tensor(point))
             assert prediction == 1 or prediction == -1, (
-                "PerceptronModel.get_prediction() should return 1 or -1, not {}".format(
-                prediction))
+                f"PerceptronModel.get_prediction() should return 1 or -1, not {prediction}")
 
             expected_prediction = np.where(np.dot(point, p.get_weights().data.T) >= 0, 1, -1).item()
             assert prediction == expected_prediction, (
-                "PerceptronModel.get_prediction() returned {}; expected {}".format(
-                    prediction, expected_prediction))
+                f"PerceptronModel.get_prediction() returned {prediction}; expected {expected_prediction}")
 
     tracker.add_points(2) # Partial credit for passing sanity checks
 
@@ -368,16 +357,12 @@ def check_perceptron(tracker):
 
         if not np.all(new_weights == expected_weights):
             print()
-            print("Initial perceptron weights were: [{:.4f}, {:.4f}]".format(
-                orig_weights[0,0], orig_weights[0,1]))
+            print(f"Initial perceptron weights were: [{orig_weights[0,0]:.4f}, {orig_weights[0,1]:.4f}]")
             print("All data points in the dataset were identical and had:")
-            print("    x = [{:.4f}, {:.4f}]".format(
-                point[0,0], point[0,1]))
+            print(f"    x = [{point[0,0]:.4f}, {point[0,1]:.4f}]")
             print("    y = -1")
-            print("Your trained weights were: [{:.4f}, {:.4f}]".format(
-                new_weights[0,0], new_weights[0,1]))
-            print("Expected weights after training: [{:.4f}, {:.4f}]".format(
-                expected_weights[0,0], expected_weights[0,1]))
+            print(f"Your trained weights were: [{new_weights[0,0]:.4f}, {new_weights[0,1]:.4f}]")
+            print(f"Expected weights after training: [{expected_weights[0,0]:.4f}, {expected_weights[0,1]:.4f}]")
             print()
             assert False, "Weight update sanity check failed"
 
@@ -392,7 +377,7 @@ def check_perceptron(tracker):
 
     accuracy = np.mean(np.where(np.dot(dataset.x, model.get_weights().data.T) >= 0.0, 1.0, -1.0) == dataset.y)
     if accuracy < 1.0:
-        print("The weights learned by your perceptron correctly classified {:.2%} of training examples".format(accuracy))
+        print(f"The weights learned by your perceptron correctly classified {accuracy:.2%} of training examples")
         print("To receive full points for this question, your perceptron must converge to 100% accuracy")
         return
 
@@ -442,18 +427,17 @@ def check_regression(tracker):
     sanity_loss = torch.mean((error.detach())**2)
 
     assert np.isclose(train_loss, sanity_loss), (
-        "RegressionModel.get_loss() returned a loss of {:.4f}, "
-        "but the autograder computed a loss of {:.4f} "
-        "based on the output of RegressionModel()".format(
-            train_loss, sanity_loss))
+        f"RegressionModel.get_loss() returned a loss of {train_loss:.4f}, "
+        f"but the autograder computed a loss of {sanity_loss:.4f} "
+        "based on the output of RegressionModel()")
 
     loss_threshold = 0.02
     
     if train_loss <= loss_threshold:
-        print("Your final loss is: {:f}".format(train_loss))
+        print(f"Your final loss is: {train_loss:f}")
         tracker.add_points(4)
     else:
-        print("Your final loss ({:f}) must be no more than {:.4f} to receive full points for this question".format(train_loss, loss_threshold))
+        print(f"Your final loss ({train_loss:f}) must be no more than {loss_threshold:.4f} to receive full points for this question")
 
 @test('q3', points=6)
 def check_digit_classification(tracker):
@@ -490,10 +474,10 @@ def check_digit_classification(tracker):
 
     accuracy_threshold = 0.97
     if test_accuracy >= accuracy_threshold:
-        print("Your final test set accuracy is: {:%}".format(test_accuracy))
+        print(f"Your final test set accuracy is: {test_accuracy:%}")
         tracker.add_points(4)
     else:
-        print("Your final test set accuracy ({:%}) must be at least {:.0%} to receive full points for this question".format(test_accuracy, accuracy_threshold))
+        print(f"Your final test set accuracy ({test_accuracy:%}) must be at least {accuracy_threshold:.0%} to receive full points for this question")
 
 @test('q4', points=7)
 def check_lang_id(tracker):
@@ -540,10 +524,10 @@ def check_lang_id(tracker):
     accuracy_threshold = 0.81
     test_accuracy = dataset.get_validation_accuracy()
     if test_accuracy >= accuracy_threshold:
-        print("Your final test set accuracy is: {:%}".format(test_accuracy))
+        print(f"Your final test set accuracy is: {test_accuracy:%}")
         tracker.add_points(5)
     else:
-        print("Your final test set accuracy ({:%}) must be at least {:.0%} to receive full points for this question".format(test_accuracy, accuracy_threshold))
+        print(f"Your final test set accuracy ({test_accuracy:%}) must be at least {accuracy_threshold:.0%} to receive full points for this question")
 
 @test('q5', points=4)
 def check_convolution(tracker):
@@ -592,10 +576,10 @@ def check_convolution(tracker):
 
     accuracy_threshold = 0.80
     if test_accuracy >= accuracy_threshold:
-        print("Your final test set accuracy is: {:%}".format(test_accuracy))
+        print(f"Your final test set accuracy is: {test_accuracy:%}")
         tracker.add_points(3)
     else:
-        print("Your final test set accuracy ({:%}) must be at least {:.0%} to receive full points for this question".format(test_accuracy, accuracy_threshold))
+        print(f"Your final test set accuracy ({test_accuracy:%}) must be at least {accuracy_threshold:.0%} to receive full points for this question")
 
 @test('q6', points=1)
 def check_attention(tracker):
